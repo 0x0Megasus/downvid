@@ -54,7 +54,7 @@ export function MediaDownloader() {
 
   return (
     <div className="space-y-4" data-dl-status={status}>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-start">
         <Input
           type="url"
           placeholder="Paste URL (YouTube, TikTok, Instagram...)"
