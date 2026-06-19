@@ -12,7 +12,7 @@ const SYSTEM_BUTTON_LABELS = new Set([
 
 export function MusicSearch() {
   const {
-    query, setQuery, suggestions, isSearching, error,
+    query, setQuery, suggestions, selectedSuggestion, isSearching, error,
     progress, status, statusMessage, handleSearch, handleSelect,
   } = useMusicSearch();
 
@@ -41,7 +41,26 @@ export function MusicSearch() {
         </Button>
       </div>
 
-      {suggestions.length > 0 && (
+      {selectedSuggestion && isBusy && (
+        <div className="space-y-2.5 animate-fadeIn">
+          <div className="px-3.5 py-2.5 bg-zinc-800/40 border border-zinc-800 rounded-lg">
+            <div className="text-sm text-zinc-200 truncate">{selectedSuggestion.title}</div>
+            <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
+              {selectedSuggestion.label}
+            </div>
+          </div>
+          <ProgressBar value={progress} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              <span className="text-xs text-zinc-500">{statusMessage}</span>
+            </div>
+            <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+          </div>
+        </div>
+      )}
+
+      {!isBusy && suggestions.length > 0 && (
         <div className="space-y-1.5 animate-fadeIn">
           {suggestions
             .filter(
@@ -52,9 +71,9 @@ export function MusicSearch() {
             .map((suggestion) => (
               <button
                 key={suggestion.index}
-                onClick={() => handleSelect(suggestion.index)}
+                onClick={() => handleSelect(suggestion)}
                 disabled={isBusy}
-                className="w-full text-left px-3.5 py-2.5 bg-zinc-800/40 hover:bg-zinc-700/40 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-all duration-150 disabled:opacity-40 group"
+                className="w-full text-left px-3.5 py-2.5 bg-zinc-800/40 hover:bg-zinc-700/40 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-all duration-150 disabled:opacity-40 group cursor-pointer"
               >
                 <div className="text-sm text-zinc-200 group-hover:text-white truncate">
                   {suggestion.title}
@@ -64,19 +83,6 @@ export function MusicSearch() {
                 </div>
               </button>
             ))}
-        </div>
-      )}
-
-      {isBusy && (
-        <div className="space-y-2.5 animate-fadeIn">
-          <ProgressBar value={progress} />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Spinner size="sm" />
-              <span className="text-xs text-zinc-500">{statusMessage}</span>
-            </div>
-            <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
-          </div>
         </div>
       )}
 

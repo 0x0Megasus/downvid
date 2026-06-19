@@ -21,6 +21,7 @@ const normalizeLabel = (label: string) => {
 export function useMusicSearch() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionItem | null>(null);
   const [sessionId, setSessionId] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
@@ -64,10 +65,11 @@ export function useMusicSearch() {
   }, [query]);
 
   const handleSelect = useCallback(
-    async (optionIndex: number) => {
+    async (option: SuggestionItem) => {
       setError("");
+      setSelectedSuggestion(option);
       try {
-        const { id } = await downloadMusic(sessionId, String(optionIndex));
+        const { id } = await downloadMusic(sessionId, String(option.index));
         downloadIdRef.current = id;
         startPolling(id);
       } catch (err) {
@@ -82,6 +84,7 @@ export function useMusicSearch() {
   const reset = useCallback(() => {
     setQuery("");
     setSuggestions([]);
+    setSelectedSuggestion(null);
     setSessionId("");
     setError("");
     resetProgress();
@@ -91,6 +94,7 @@ export function useMusicSearch() {
     query,
     setQuery,
     suggestions,
+    selectedSuggestion,
     isSearching,
     error,
     progress,
