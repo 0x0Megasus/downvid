@@ -4,6 +4,7 @@ export interface DownloadResponse {
 
 export interface ProgressResponse {
   progress: number;
+  error?: string;
 }
 
 export interface FileInfo {
@@ -13,15 +14,14 @@ export interface FileInfo {
 }
 
 export interface MusicOption {
-  index: number;
-  title: string;
+  id: string;
   label: string;
 }
 
 export interface MusicSearchResponse {
   sessionId: string;
   query: string;
-  options: MusicOption[];
+  suggestions: MusicOption[];
 }
 
 export interface MusicDownloadResponse {

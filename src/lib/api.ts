@@ -62,11 +62,11 @@ export async function searchMusic(
 
 export async function downloadMusic(
   sessionId: string,
-  optionIndex: number,
+  optionId: string,
 ): Promise<MusicDownloadResponse> {
   return request<MusicDownloadResponse>("/api/music/download", {
     method: "POST",
-    body: JSON.stringify({ sessionId, optionId: optionIndex }),
+    body: JSON.stringify({ sessionId, optionId }),
   });
 }
 

@@ -32,7 +32,7 @@ export function useProgress() {
         if (p === -1) {
           stopPolling();
           setStatus("error");
-          setStatusMessage("Download failed. The link may be invalid.");
+          setStatusMessage(data.error || "Download failed. The link may be invalid.");
           return;
         }
 
