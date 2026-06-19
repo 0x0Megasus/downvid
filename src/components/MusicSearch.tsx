@@ -71,7 +71,7 @@ export function MusicSearch() {
       )}
 
       {!isDownloading && !isBusy && suggestions.length > 0 && (
-        <div className="max-h-60 overflow-y-auto scroll-smooth space-y-1.5 animate-fadeIn">
+        <div className="max-h-[40vh] overflow-y-auto scroll-smooth space-y-1.5 animate-fadeIn">
           {suggestions
             .filter(
               (s) =>
