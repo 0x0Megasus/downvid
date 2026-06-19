@@ -6,6 +6,7 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+  preload: true,
 });
 
 const APP_NAME = "Downvid - Free Video & Music Downloader";

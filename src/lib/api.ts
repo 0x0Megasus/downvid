@@ -1,4 +1,3 @@
-import { API_BASE } from "./constants";
 import type {
   DownloadResponse,
   ProgressResponse,
@@ -21,8 +20,7 @@ async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const url = `${API_BASE}${path}`;
-  const res = await fetch(url, {
+  const res = await fetch(path, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -73,5 +71,5 @@ export async function downloadMusic(
 }
 
 export function getFileDownloadUrl(id: string): string {
-  return `${API_BASE}/api/file/${id}`;
+  return `/api/file/${id}`;
 }
