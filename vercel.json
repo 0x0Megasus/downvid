@@ -1,6 +1,5 @@
 {
   "env": {
-    "BACKEND_URL": "https://mega-video-downloader-production-a0c8.up.railway.app",
-    "NEXT_PUBLIC_API_URL": "https://mega-video-downloader-production-a0c8.up.railway.app"
+    "BACKEND_URL": "https://mega-video-downloader-production-a0c8.up.railway.app"
   }
 }
