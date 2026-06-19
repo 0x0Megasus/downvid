@@ -1,0 +1,5 @@
+{
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://mega-video-downloader-production-ae00.up.railway.app"
+  }
+}
