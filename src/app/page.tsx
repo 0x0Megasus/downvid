@@ -37,12 +37,15 @@ export default function HomePage() {
             <header className="text-center space-y-1 mb-5">
               <h1 className="text-[28px] sm:text-[34px] font-bold tracking-tight">
                 <span className="bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
-                  {mode === "privacy" ? "Privacy" : mode === "about" ? "About" : "Downvid"}
+                  {mode === "media" && "Downvid - Video & Image Downloader"}
+                  {mode === "music" && "Downvid - Music Downloader"}
+                  {mode === "about" && "About Downvid"}
+                  {mode === "privacy" && "Privacy"}
                 </span>
               </h1>
               <p className="text-zinc-500 text-xs sm:text-sm">
-                {mode === "media" && "Free Video & Image Downloader"}
-                {mode === "music" && "Free Music Downloader"}
+                {mode === "media" && "Download from any platform. Free & instant."}
+                {mode === "music" && "Search any song, download as audio."}
                 {mode === "about" && "About Downvid & supported platforms."}
                 {mode === "privacy" && "How we handle your data."}
               </p>
