@@ -73,9 +73,15 @@ export function useMusicSearch() {
         downloadIdRef.current = id;
         startPolling(id);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Download failed",
-        );
+        const msg = err instanceof Error ? err.message : "Download failed";
+        if (/expired|not found|410|404/i.test(msg)) {
+          setSuggestions([]);
+          setSelectedSuggestion(null);
+          setSessionId("");
+          setError("Session expired — please search again.");
+        } else {
+          setError(msg);
+        }
       }
     },
     [sessionId, startPolling],
