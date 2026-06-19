@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -11,7 +12,8 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="flex-1 flex items-center justify-center px-5 pb-20 pt-4">
+    <>
+      <main className="flex-1 flex items-center justify-center px-5 pb-24 pt-4">
       <div className="w-full max-w-lg mx-auto space-y-5">
         <h1 className="text-[28px] sm:text-[34px] font-bold text-center tracking-tight">
           <span className="bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
@@ -53,7 +55,10 @@ export default function PrivacyPage() {
             })}
           </p>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+
+      <Navbar />
+    </>
   );
 }

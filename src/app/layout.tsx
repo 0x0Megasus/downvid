@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-  preload: true,
-});
 
 const APP_NAME = "Downvid - Free Video & Music Downloader";
 const BASE_URL = "https://www.downvid.online";
@@ -107,9 +100,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${GeistSans.variable}`}>
       <body
-        className={`${inter.variable} font-sans bg-black text-white antialiased min-h-dvh flex flex-col`}
+        className="font-sans bg-black text-white antialiased min-h-dvh flex flex-col"
       >
         {children}
       </body>

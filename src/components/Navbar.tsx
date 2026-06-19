@@ -1,15 +1,16 @@
 "use client";
 
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Mode } from "@/types";
 import type { ReactNode } from "react";
 
 interface NavbarProps {
-  activeMode: Mode;
-  onModeChange: (mode: Mode) => void;
+  activeMode?: Mode;
+  onModeChange?: (mode: Mode) => void;
 }
 
-const TABS: { id: Mode; label: string; icon: ReactNode }[] = [
+const TABS: { id: string; label: string; icon: ReactNode }[] = [
   {
     id: "media",
     label: "Video/Image",
@@ -56,6 +57,21 @@ const TABS: { id: Mode; label: string; icon: ReactNode }[] = [
 ];
 
 export function Navbar({ activeMode, onModeChange }: NavbarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const isActive = (id: string) => {
+    if (id === "about") return pathname === "/about";
+    if (id === "privacy") return pathname === "/privacy";
+    return activeMode === id;
+  };
+
+  const handleClick = (id: string) => {
+    if (id === "about") router.push("/about");
+    else if (id === "privacy") router.push("/privacy");
+    else if (onModeChange) onModeChange(id as Mode);
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-1 pointer-events-none">
       <div className="max-w-lg mx-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/80 rounded-2xl shadow-2xl shadow-black/40 pointer-events-auto safe-area-bottom" role="tablist">
@@ -64,11 +80,11 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
             <button
               key={tab.id}
               role="tab"
-              aria-selected={activeMode === tab.id}
-              onClick={() => onModeChange(tab.id)}
+              aria-selected={isActive(tab.id)}
+              onClick={() => handleClick(tab.id)}
               className={cn(
                 "flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl transition-all duration-150 cursor-pointer",
-                activeMode === tab.id
+                isActive(tab.id)
                   ? "text-red-500 bg-red-500/10"
                   : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50",
               )}

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://www.downvid.online";
+  const baseUrl = process.env.SITE_URL || "https://www.downvid.online";
 
   return [
     {

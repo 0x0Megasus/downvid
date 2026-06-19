@@ -36,7 +36,7 @@ export type DownloadStatus =
   | "complete"
   | "error";
 
-export type Mode = "media" | "music" | "about" | "privacy";
+export type Mode = "media" | "music";
 
 export const PLATFORMS = [
   "YouTube",
