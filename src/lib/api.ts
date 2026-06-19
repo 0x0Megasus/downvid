@@ -29,7 +29,12 @@ async function request<T>(
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "Unknown error");
-    throw new ApiError(text, res.status);
+    let message = text;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.error) message = parsed.error;
+    } catch {}
+    throw new ApiError(message, res.status);
   }
   return res.json() as Promise<T>;
 }
