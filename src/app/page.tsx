@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { MediaDownloader } from "@/components/MediaDownloader";
 import { MusicSearch } from "@/components/MusicSearch";
 import type { Mode } from "@/types";
 
-export default function HomePage() {
-  const [mode, setMode] = useState<Mode>("media");
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const modeParam = searchParams.get("mode");
+  const mode: Mode = modeParam === "music" ? "music" : "media";
+
+  const setMode = (m: Mode) => {
+    router.replace(`/?mode=${m}`, { scroll: false });
+  };
 
   return (
     <>
@@ -62,5 +71,13 @@ export default function HomePage() {
         }}
       />
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

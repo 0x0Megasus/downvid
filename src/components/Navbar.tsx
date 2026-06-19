@@ -69,7 +69,8 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
   const handleClick = (id: string) => {
     if (id === "about") router.push("/about");
     else if (id === "privacy") router.push("/privacy");
-    else if (onModeChange) onModeChange(id as Mode);
+    else if (pathname === "/") onModeChange?.(id as Mode);
+    else router.push(`/?mode=${id}`);
   };
 
   return (
