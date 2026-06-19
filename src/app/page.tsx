@@ -41,8 +41,8 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="text-zinc-500 text-xs sm:text-sm">
-                {mode === "media" && "Download from any platform. Free & instant."}
-                {mode === "music" && "Search any song, download as audio."}
+                {mode === "media" && "Free Video & Image Downloader"}
+                {mode === "music" && "Free Music Downloader"}
                 {mode === "about" && "About Downvid & supported platforms."}
                 {mode === "privacy" && "How we handle your data."}
               </p>

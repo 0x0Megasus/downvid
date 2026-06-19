@@ -69,6 +69,7 @@ export function useMusicSearch() {
     async (option: SuggestionItem) => {
       setError("");
       setSelectedSuggestion(option);
+      setSuggestions([]);
       setIsDownloading(true);
       try {
         const { id } = await downloadMusic(sessionId, String(option.index));
