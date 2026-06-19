@@ -9,7 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function Input({ className, error, id, ...props }: InputProps) {
   return (
-    <div className="w-full">
+    <div className="relative w-full">
       <input
         id={id}
         className={cn(
@@ -21,7 +21,7 @@ export function Input({ className, error, id, ...props }: InputProps) {
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="absolute top-full mt-1 left-0 text-xs text-red-400 pointer-events-none">{error}</p>}
     </div>
   );
 }
