@@ -24,6 +24,7 @@ export function useMusicSearch() {
   const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionItem | null>(null);
   const [sessionId, setSessionId] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState("");
   const { progress, status, statusMessage, startPolling, reset: resetProgress } = useProgress();
   const downloadIdRef = useRef<string | null>(null);
@@ -68,6 +69,7 @@ export function useMusicSearch() {
     async (option: SuggestionItem) => {
       setError("");
       setSelectedSuggestion(option);
+      setIsDownloading(true);
       try {
         const { id } = await downloadMusic(sessionId, String(option.index));
         downloadIdRef.current = id;
@@ -82,6 +84,8 @@ export function useMusicSearch() {
         } else {
           setError(msg);
         }
+      } finally {
+        setIsDownloading(false);
       }
     },
     [sessionId, startPolling],
@@ -92,6 +96,7 @@ export function useMusicSearch() {
     setSuggestions([]);
     setSelectedSuggestion(null);
     setSessionId("");
+    setIsDownloading(false);
     setError("");
     resetProgress();
   }, [resetProgress]);
@@ -102,6 +107,7 @@ export function useMusicSearch() {
     suggestions,
     selectedSuggestion,
     isSearching,
+    isDownloading,
     error,
     progress,
     status,

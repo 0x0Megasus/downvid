@@ -12,7 +12,7 @@ const SYSTEM_BUTTON_LABELS = new Set([
 
 export function MusicSearch() {
   const {
-    query, setQuery, suggestions, selectedSuggestion, isSearching, error,
+    query, setQuery, suggestions, selectedSuggestion, isSearching, isDownloading, error,
     progress, status, statusMessage, handleSearch, handleSelect,
   } = useMusicSearch();
 
@@ -29,19 +29,19 @@ export function MusicSearch() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           error={error}
-          disabled={isSearching || isBusy}
+          disabled={isSearching || isBusy || isDownloading}
         />
         <Button
           onClick={handleSearch}
           loading={isSearching}
-          disabled={isEmpty || isSearching || isBusy}
+          disabled={isEmpty || isSearching || isBusy || isDownloading}
           className="shrink-0 min-w-[100px]"
         >
           {isSearching ? "Searching" : "Search"}
         </Button>
       </div>
 
-      {selectedSuggestion && isBusy && (
+      {selectedSuggestion && (isDownloading || isBusy) && (
         <div className="space-y-2.5 animate-fadeIn">
           <div className="px-3.5 py-2.5 bg-zinc-800/40 border border-zinc-800 rounded-lg">
             <div className="text-sm text-zinc-200 truncate">{selectedSuggestion.title}</div>
@@ -49,19 +49,29 @@ export function MusicSearch() {
               {selectedSuggestion.label}
             </div>
           </div>
-          <ProgressBar value={progress} />
-          <div className="flex items-center justify-between">
+          {isDownloading && (
             <div className="flex items-center gap-2">
               <Spinner size="sm" />
-              <span className="text-xs text-zinc-500">{statusMessage}</span>
+              <span className="text-xs text-zinc-500">Requesting download...</span>
             </div>
-            <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
-          </div>
+          )}
+          {isBusy && (
+            <>
+              <ProgressBar value={progress} />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Spinner size="sm" />
+                  <span className="text-xs text-zinc-500">{statusMessage}</span>
+                </div>
+                <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      {!isBusy && suggestions.length > 0 && (
-        <div className="space-y-1.5 animate-fadeIn">
+      {!isDownloading && !isBusy && suggestions.length > 0 && (
+        <div className="max-h-60 overflow-y-auto scroll-smooth space-y-1.5 animate-fadeIn">
           {suggestions
             .filter(
               (s) =>
@@ -72,8 +82,7 @@ export function MusicSearch() {
               <button
                 key={suggestion.index}
                 onClick={() => handleSelect(suggestion)}
-                disabled={isBusy}
-                className="w-full text-left px-3.5 py-2.5 bg-zinc-800/40 hover:bg-zinc-700/40 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-all duration-150 disabled:opacity-40 group cursor-pointer"
+                className="w-full text-left px-3.5 py-2.5 bg-zinc-800/40 hover:bg-zinc-700/40 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-all duration-150 group cursor-pointer"
               >
                 <div className="text-sm text-zinc-200 group-hover:text-white truncate">
                   {suggestion.title}
@@ -86,7 +95,7 @@ export function MusicSearch() {
         </div>
       )}
 
-      {!isSearching && !isBusy && suggestions.length === 0 && !error && (
+      {!isSearching && !isDownloading && !isBusy && suggestions.length === 0 && !error && (
         <p className="text-xs text-zinc-600 text-center">
           Search by song or artist name. No URL needed.
         </p>
