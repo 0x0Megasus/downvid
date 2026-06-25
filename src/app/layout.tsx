@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
-import { Suspense } from "react";
-import { LoadingBar } from "@/components/LoadingBar";
 import "./globals.css";
 
 const APP_NAME = "Downvid - Free Video & Music Downloader";
@@ -106,9 +104,6 @@ export default function RootLayout({
       <body
         className="font-sans bg-black text-white antialiased min-h-dvh flex flex-col"
       >
-        <Suspense fallback={null}>
-          <LoadingBar />
-        </Suspense>
         {children}
       </body>
     </html>
