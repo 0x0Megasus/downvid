@@ -63,7 +63,9 @@ export function MusicSearch() {
                   <Spinner size="sm" />
                   <span className="text-xs text-zinc-500">{statusMessage}</span>
                 </div>
-                <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+                {progress > 0 && (
+                  <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+                )}
               </div>
             </>
           )}

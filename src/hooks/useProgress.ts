@@ -2,7 +2,11 @@
 
 import { useCallback, useRef, useState } from "react";
 import { getProgress } from "@/lib/api";
-import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from "@/lib/constants";
+import {
+  POLL_INTERVAL_MS,
+  POLL_TIMEOUT_MS,
+  MAX_RETRIES,
+} from "@/lib/constants";
 import type { DownloadStatus } from "@/types";
 
 export function useProgress() {
@@ -11,11 +15,13 @@ export function useProgress() {
   const [statusMessage, setStatusMessage] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryCountRef = useRef(0);
 
   const startPolling = useCallback((id: string) => {
     setStatus("connecting");
     setProgress(0);
     setStatusMessage("Connecting to server...");
+    retryCountRef.current = 0;
 
     const timeout = setTimeout(() => {
       stopPolling();
@@ -27,6 +33,8 @@ export function useProgress() {
     const interval = setInterval(async () => {
       try {
         const data = await getProgress(id);
+        // Reset retry count on success
+        retryCountRef.current = 0;
         const p = data.progress;
 
         if (p === -1) {
@@ -56,9 +64,19 @@ export function useProgress() {
           setStatusMessage("Done! Starting download...");
         }
       } catch {
-        stopPolling();
-        setStatus("error");
-        setStatusMessage("Connection lost. Please try again.");
+        retryCountRef.current += 1;
+
+        if (retryCountRef.current >= MAX_RETRIES) {
+          stopPolling();
+          setStatus("error");
+          setStatusMessage("Connection lost. Please try again.");
+          return;
+        }
+
+        // Exponential backoff: skip this poll cycle, retry on next
+        setStatusMessage(
+          `Reconnecting... (attempt ${retryCountRef.current}/${MAX_RETRIES})`,
+        );
       }
     }, POLL_INTERVAL_MS);
     intervalRef.current = interval;
@@ -80,6 +98,7 @@ export function useProgress() {
     setProgress(0);
     setStatus("idle");
     setStatusMessage("");
+    retryCountRef.current = 0;
   }, [stopPolling]);
 
   return { progress, status, statusMessage, startPolling, stopPolling, reset };

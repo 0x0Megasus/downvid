@@ -15,6 +15,7 @@ function HomeContent() {
   const mode: Mode = modeParam === "music" ? "music" : "media";
 
   const setMode = (m: Mode) => {
+    if (m === mode) return;
     router.replace(`/?mode=${m}`, { scroll: false });
   };
 

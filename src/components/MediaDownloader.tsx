@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
@@ -12,17 +12,25 @@ export function MediaDownloader() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const { progress, status, statusMessage, startPolling, reset } = useProgress();
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const idRef = useRef<string | null>(null);
 
-  const cleanupPolling = useCallback(() => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  useEffect(() => {
+    if (status === "complete" && idRef.current) {
+      const id = idRef.current;
+      idRef.current = null;
+      window.location.href = getFileDownloadUrl(id);
+      // Auto-reset immediately so the button doesn't freeze on "Opening..."
+      reset();
     }
-  }, []);
+  }, [status, reset]);
 
-  useEffect(() => cleanupPolling, [cleanupPolling]);
+  useEffect(() => {
+    return () => {
+      if (idRef.current) {
+        idRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     setError("");
@@ -35,25 +43,17 @@ export function MediaDownloader() {
       const { id } = await submitDownload(url.trim());
       idRef.current = id;
       startPolling(id);
-
-      pollingRef.current = setInterval(() => {
-        const el = document.querySelector("[data-dl-status]");
-        if (el?.getAttribute("data-dl-status") === "complete" && idRef.current) {
-          cleanupPolling();
-          window.location.href = getFileDownloadUrl(idRef.current);
-        }
-      }, 200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Connection failed");
       reset();
     }
-  }, [url, startPolling, reset, cleanupPolling]);
+  }, [url, startPolling, reset]);
 
   const isBusy = status === "connecting" || status === "downloading" || status === "processing";
   const isEmpty = !url.trim();
 
   return (
-    <div className="space-y-4" data-dl-status={status}>
+    <div className="space-y-4">
       <div className="flex gap-2">
         <Input
           type="url"
@@ -70,10 +70,10 @@ export function MediaDownloader() {
         <Button
           onClick={handleSubmit}
           loading={isBusy}
-          disabled={isEmpty || isBusy || status === "complete"}
+          disabled={isEmpty || isBusy}
           className="shrink-0 min-w-[100px]"
         >
-          {status === "complete" ? "Opening..." : "Download"}
+          Download
         </Button>
       </div>
 
@@ -85,7 +85,9 @@ export function MediaDownloader() {
               <Spinner size="sm" />
               <span className="text-xs text-zinc-500">{statusMessage}</span>
             </div>
-            <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+            {progress > 0 && (
+              <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
+            )}
           </div>
         </div>
       )}

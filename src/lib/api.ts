@@ -5,6 +5,7 @@ import type {
   MusicDownloadResponse,
   FileInfo,
 } from "@/types";
+import { REQUEST_TIMEOUT_MS } from "@/lib/constants";
 
 class ApiError extends Error {
   constructor(
@@ -19,24 +20,39 @@ class ApiError extends Error {
 async function request<T>(
   path: string,
   options: RequestInit = {},
+  timeoutMs: number = REQUEST_TIMEOUT_MS,
 ): Promise<T> {
-  const res = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "Unknown error");
-    let message = text;
-    try {
-      const parsed = JSON.parse(text);
-      if (parsed.error) message = parsed.error;
-    } catch {}
-    throw new ApiError(message, res.status);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(path, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "Unknown error");
+      let message = text;
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.error) message = parsed.error;
+      } catch {}
+      throw new ApiError(message, res.status);
+    }
+    return res.json() as Promise<T>;
+  } catch (err) {
+    clearTimeout(timer);
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError("Request timed out", 408);
+    }
+    throw err;
   }
-  return res.json() as Promise<T>;
 }
 
 export async function submitDownload(url: string): Promise<DownloadResponse> {
