@@ -12,7 +12,7 @@ export function ProgressBar({ value, className }: ProgressBarProps) {
 
   return (
     <div
-      className={cn("w-full bg-zinc-800 rounded-full h-1 overflow-hidden", className)}
+      className={cn("w-full bg-zinc-800 rounded-[2px] h-[3px] overflow-hidden", className)}
       role="progressbar"
       aria-valuenow={clamped}
       aria-valuemin={0}
@@ -20,11 +20,23 @@ export function ProgressBar({ value, className }: ProgressBarProps) {
     >
       <div
         className={cn(
-          "h-full rounded-full transition-all duration-300 ease-out",
-          clamped === 100 ? "bg-green-500" : "bg-red-500",
+          "relative h-full rounded-[2px] transition-all duration-300 ease-out overflow-hidden",
+          clamped === 100 ? "bg-ok" : "bg-signal",
         )}
         style={{ width: `${clamped}%` }}
-      />
+      >
+        {clamped > 0 && clamped < 100 && (
+          <span
+            aria-hidden="true"
+            className="animate-stripes absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(45deg, rgba(255,255,255,0.25) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.25) 75%, transparent 75%)",
+              backgroundSize: "14px 14px",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

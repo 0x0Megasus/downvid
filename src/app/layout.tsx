@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+});
 
 const APP_NAME = "Downvid - Free Video & Music Downloader";
 const BASE_URL = "https://www.downvid.online";
@@ -100,7 +113,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${GeistSans.variable}`}>
+    <html lang="en" className={`dark ${GeistSans.variable} ${display.variable} ${mono.variable}`}>
       <body
         className="font-sans bg-black text-white antialiased min-h-dvh flex flex-col"
       >

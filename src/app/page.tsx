@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { MediaDownloader } from "@/components/MediaDownloader";
 import { MusicSearch } from "@/components/MusicSearch";
+import { Skeleton } from "@/components/ui/Skeleton";
 import type { Mode } from "@/types";
 
 function HomeContent() {
@@ -23,25 +24,34 @@ function HomeContent() {
     <>
       <main className="flex-1 flex items-center justify-center px-5 pb-24 pt-4">
         <div className="w-full max-w-lg mx-auto">
-          <div>
-            <header className="text-center space-y-1 mb-5">
-              <h1 className="text-[18px] min-[400px]:text-[22px] sm:text-[34px] font-bold tracking-tight text-nowrap">
-                <span className="bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
-                  {mode === "media" ? "Downvid - Video & Image Downloader" : "Downvid - Music Downloader"}
-                </span>
-              </h1>
-              <p className="text-zinc-500 text-xs sm:text-sm">
-                {mode === "media"
-                  ? "Download from any platform. Free & instant."
-                  : "Search any song, download as audio."}
+          <header className="mb-5 animate-rise">
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="h-2 w-2 rounded-full bg-signal animate-pulse-dot"
+              />
+              <p className="font-mono text-[12px] font-medium uppercase tracking-[0.18em] text-zinc-400">
+                Downvid
               </p>
-            </header>
-
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 sm:p-5 shadow-sm">
-              {mode === "media" && <MediaDownloader />}
-              {mode === "music" && <MusicSearch />}
             </div>
-          </div>
+            <h1 className="mt-2 font-display text-[30px] sm:text-[38px] font-bold leading-[1.02] tracking-tight text-white text-balance">
+              {mode === "media" ? "Download videos and photos" : "Find the song and download it"}
+            </h1>
+            <p className="mt-1 text-[13px] sm:text-sm text-zinc-500">
+              {mode === "media"
+                ? "Paste a link from YouTube, TikTok, Instagram and more. Free, no account."
+                : "Just tell us the song or who sings it — tap your match and it's downloading."}
+            </p>
+          </header>
+
+          <section
+            aria-label={mode === "media" ? "Video downloader" : "Music search"}
+            className="bg-panel border border-hairline rounded-sm p-4 sm:p-5 animate-rise"
+            style={{ animationDelay: "90ms" }}
+          >
+            {mode === "media" && <MediaDownloader />}
+            {mode === "music" && <MusicSearch />}
+          </section>
         </div>
       </main>
 
@@ -77,7 +87,26 @@ function HomeContent() {
 
 export default function HomePage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <main className="flex-1 flex items-center justify-center px-5 pb-24 pt-4">
+          <div className="w-full max-w-lg mx-auto" aria-busy="true">
+            <div className="flex items-center gap-2 mb-5">
+              <Skeleton className="h-2 w-2 rounded-full" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <Skeleton className="h-9 w-3/4 rounded-sm mb-2" />
+            <Skeleton className="h-4 w-full rounded-sm mb-5" />
+            <div className="bg-panel border border-hairline rounded-sm p-4 sm:p-5">
+              <div className="flex gap-2">
+                <Skeleton className="h-11 flex-1 rounded-sm" />
+                <Skeleton className="h-11 w-[100px] rounded-sm" />
+              </div>
+            </div>
+          </div>
+        </main>
+      }
+    >
       <HomeContent />
     </Suspense>
   );

@@ -1,32 +1,61 @@
 import { NextResponse } from "next/server";
 
-const API_BASE = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
+
+const ID_PATTERN = /^[A-Za-z0-9_-]{4,128}$/;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const { id } = await params;
-    const res = await fetch(`${API_BASE}/api/file/${id}`);
+  const { id } = await params;
+  if (!ID_PATTERN.test(id)) {
+    return NextResponse.json({ error: "Invalid file id" }, { status: 400 });
+  }
 
-    if (!res.ok) {
+  try {
+    const headers: Record<string, string> = {};
+    const range = request.headers.get("range");
+    if (range) headers["Range"] = range;
+
+    const res = await fetch(`${API_BASE}/api/file/${id}`, { headers });
+
+    if (!res.ok || !res.body) {
+      let msg = "File not found";
+      try {
+        const errJson = (await res.json()) as { error?: string };
+        if (errJson?.error) msg = errJson.error;
+      } catch {
+        // backend streams bytes on success, JSON only on error
+      }
       return NextResponse.json(
-        { error: "File not found" },
-        { status: 404 },
+        { error: msg },
+        { status: res.status === 416 ? 416 : 404 },
       );
     }
 
-    const contentType = res.headers.get("content-type") || "application/octet-stream";
-    const contentDisposition = res.headers.get("content-disposition") || `attachment; filename="${id}"`;
+    const passthrough = new Headers();
+    const copy = (name: string) => {
+      const v = res.headers.get(name);
+      if (v) passthrough.set(name, v);
+    };
+    copy("content-type");
+    copy("content-length");
+    copy("content-disposition");
+    copy("accept-ranges");
+    copy("content-range");
+    passthrough.set("Cache-Control", "no-cache, no-store, must-revalidate");
+
+    if (!passthrough.has("content-disposition")) {
+      passthrough.set("content-disposition", `attachment; filename="${id}"`);
+    }
 
     return new NextResponse(res.body, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": contentDisposition,
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-      },
+      status: res.status, // preserve 200 / 206 for range requests
+      headers: passthrough,
     });
   } catch {
     return NextResponse.json(

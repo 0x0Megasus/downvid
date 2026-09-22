@@ -22,10 +22,17 @@ export function validateUrl(url: string): boolean {
 
 export function getClientId(): string {
   if (typeof window === "undefined") return "";
-  let id = localStorage.getItem("downvid_client_id");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("downvid_client_id", id);
+  try {
+    let id = localStorage.getItem("downvid_client_id");
+    if (!id) {
+      id =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem("downvid_client_id", id);
+    }
+    return id;
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
-  return id;
 }

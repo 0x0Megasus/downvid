@@ -3,33 +3,61 @@
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
-import { Spinner } from "./ui/Spinner";
+import { Skeleton } from "./ui/Skeleton";
 import { useMusicSearch } from "@/hooks/useMusicSearch";
 
 const SYSTEM_BUTTON_LABELS = new Set([
   "next", "prev", "back", "cancel", "menu", "search", "more", "select",
 ]);
 
+const SKELETON_ROWS = 5;
+
 export function MusicSearch() {
   const {
-    query, setQuery, suggestions, selectedSuggestion, isSearching, isDownloading, error,
-    progress, status, statusMessage, handleSearch, handleSelect,
+    query,
+    setQuery,
+    suggestions,
+    selectedSuggestion,
+    isSearching,
+    isDownloading,
+    error,
+    progress,
+    status,
+    statusMessage,
+    downloadId,
+    handleSearch,
+    handleSelect,
+    retryDownload,
+    dismissResult,
   } = useMusicSearch();
 
-  const isBusy = status === "connecting" || status === "downloading" || status === "processing";
+  const isBusy =
+    status === "connecting" ||
+    status === "downloading" ||
+    status === "processing";
   const isEmpty = !query.trim();
 
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
+        <label htmlFor="music-query" className="sr-only">
+          Song or artist
+        </label>
         <Input
+          id="music-query"
           type="text"
-          placeholder="Song or artist name..."
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="Song or artist"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (status !== "idle") dismissResult();
+          }}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           error={error}
           disabled={isSearching || isBusy || isDownloading}
+          aria-label="Song or artist"
         />
         <Button
           onClick={handleSearch}
@@ -37,71 +65,126 @@ export function MusicSearch() {
           disabled={isEmpty || isSearching || isBusy || isDownloading}
           className="shrink-0 min-w-[100px]"
         >
-          {isSearching ? "Searching" : "Search"}
+          {isSearching ? "Finding" : "Find"}
         </Button>
       </div>
 
-      {selectedSuggestion && (isDownloading || isBusy) && (
-        <div className="space-y-2.5 animate-fadeIn">
-          <div className="px-3.5 py-2.5 bg-zinc-800/40 border border-zinc-800 rounded-lg">
-            <div className="text-sm text-zinc-200 truncate">{selectedSuggestion.title}</div>
-            <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
-              {selectedSuggestion.label}
+      {isSearching && (
+        <div className="space-y-1.5" aria-busy="true" aria-label="Finding matches">
+          {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-sm border border-hairline bg-raise/40 px-3.5 py-2.5"
+            >
+              <Skeleton
+                className="h-3.5 rounded"
+                animated
+              />
+              <div className="mt-1.5 w-2/3">
+                <Skeleton className="h-2.5 rounded" animated />
+              </div>
             </div>
-          </div>
-          {isDownloading && (
-            <div className="flex items-center gap-2">
-              <Spinner size="sm" />
-              <span className="text-xs text-zinc-500">Requesting download...</span>
+          ))}
+        </div>
+      )}
+
+      {!isSearching && selectedSuggestion && (isDownloading || isBusy) && (
+        <div
+          className="animate-fadeIn rounded-sm border border-hairline bg-raise/60 px-3.5 py-3"
+          aria-live="polite"
+        >
+          <p className="truncate text-[13px] text-zinc-200">
+            {selectedSuggestion.title}
+          </p>
+          {isDownloading && !isBusy && (
+            <div className="space-y-1.5" aria-busy="true" aria-label="Requesting download">
+              <Skeleton className="h-3.5 w-3/4" />
+              <Skeleton className="h-2.5 w-1/2" />
             </div>
           )}
           {isBusy && (
             <>
-              <ProgressBar value={progress} />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Spinner size="sm" />
-                  <span className="text-xs text-zinc-500">{statusMessage}</span>
-                </div>
-                {progress > 0 && (
-                  <span className="text-xs text-zinc-600 tabular-nums">{progress}%</span>
-                )}
+              <div className="mt-1.5 flex items-center justify-between gap-3">
+                <p className="flex min-w-0 items-center gap-2 text-xs text-zinc-500">
+                  <span
+                    aria-hidden="true"
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-signal animate-pulse-dot"
+                  />
+                  <span className="truncate">{statusMessage}</span>
+                </p>
+                <span className="shrink-0 font-mono text-xs text-zinc-400 tabular-nums">
+                  {progress}%
+                </span>
               </div>
+              <ProgressBar value={progress} className="mt-2.5" />
             </>
           )}
         </div>
       )}
 
-      {!isDownloading && !isBusy && suggestions.length > 0 && (
-        <div className="max-h-[40vh] overflow-y-auto scroll-smooth space-y-1.5 animate-fadeIn">
-          {suggestions
-            .filter(
-              (s) =>
-                !SYSTEM_BUTTON_LABELS.has(s.label.toLowerCase().trim()) &&
-                s.label !== String(s.index),
-            )
-            .map((suggestion) => (
-              <button
-                key={suggestion.index}
-                onClick={() => handleSelect(suggestion)}
-                className="w-full text-left px-3.5 py-2.5 bg-zinc-800/40 hover:bg-zinc-700/40 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-all duration-150 group cursor-pointer"
-              >
-                <div className="text-sm text-zinc-200 group-hover:text-white truncate">
-                  {suggestion.title}
-                </div>
-                <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
-                  {suggestion.label}
-                </div>
-              </button>
-            ))}
+      {status === "error" && selectedSuggestion && (
+        <div className="flex items-center justify-between gap-3 rounded-sm border border-red-500/20 bg-red-500/[0.06] px-3.5 py-2.5 animate-fadeIn">
+          <p className="text-[13px] text-red-300">
+            {statusMessage || "The transfer stopped."}
+          </p>
+          <Button variant="ghost" size="sm" onClick={retryDownload}>
+            Retry
+          </Button>
         </div>
       )}
 
-      {!isSearching && !isDownloading && !isBusy && suggestions.length === 0 && !error && (
-        <p className="text-xs text-zinc-600 text-center">
-          Search by song or artist name. No URL needed.
-        </p>
+      {status === "complete" && downloadId && selectedSuggestion && (
+        <div className="animate-fadeIn rounded-sm border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-2.5">
+          <p className="truncate text-[13px] text-zinc-200">
+            {selectedSuggestion.title}
+          </p>
+          <p className="mt-0.5 text-xs text-emerald-300">
+            Downloaded. Search another anytime.
+          </p>
+        </div>
       )}
+
+      {!isSearching &&
+        !isDownloading &&
+        !isBusy &&
+        status !== "complete" &&
+        status !== "error" &&
+        suggestions.length > 0 && (
+          <ol className="stagger-children max-h-[40vh] space-y-1.5 overflow-y-auto scroll-smooth">
+            {suggestions
+              .filter(
+                (s) =>
+                  !SYSTEM_BUTTON_LABELS.has(s.label.toLowerCase().trim()) &&
+                  s.label !== String(s.index),
+              )
+              .map((suggestion) => (
+                <li key={suggestion.index}>
+                  <button
+                    onClick={() => handleSelect(suggestion)}
+                    className="w-full cursor-pointer rounded-sm border border-hairline bg-raise/40 px-3.5 py-2.5 text-left transition-colors duration-150 hover:border-zinc-700 hover:bg-raise active:scale-[0.99]"
+                  >
+                    <span className="block truncate text-[13px] text-zinc-200">
+                      {suggestion.title}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[11px] text-zinc-500">
+                      {suggestion.label}
+                    </span>
+                  </button>
+                </li>
+              ))}
+          </ol>
+        )}
+
+      {!isSearching &&
+        !isDownloading &&
+        !isBusy &&
+        status !== "complete" &&
+        suggestions.length === 0 &&
+        !error && (
+          <p className="text-xs text-zinc-600">
+            Name a track or an artist. No link needed.
+          </p>
+        )}
     </div>
   );
 }

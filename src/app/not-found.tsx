@@ -2,15 +2,20 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="flex-1 flex items-center justify-center px-4">
-      <div className="text-center space-y-4">
-        <h2 className="text-6xl font-extrabold text-zinc-800">404</h2>
-        <p className="text-zinc-400">Page not found</p>
+    <div className="flex-1 flex items-center justify-center px-5">
+      <div className="w-full max-w-lg rounded-sm border border-hairline bg-panel p-6 animate-rise">
+        <p className="font-mono text-[13px] font-medium text-zinc-500">404</p>
+        <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-white">
+          Nothing here
+        </h2>
+        <p className="mt-1 text-[13px] text-zinc-500">
+          This address has no screen. Head back to download something.
+        </p>
         <Link
           href="/"
-          className="inline-block px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl transition-colors"
+          className="mt-4 inline-block rounded-sm bg-signal-deep px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-signal active:scale-[0.98]"
         >
-          Go home
+          Back to Downvid
         </Link>
       </div>
     </div>

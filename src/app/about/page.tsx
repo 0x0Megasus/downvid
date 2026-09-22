@@ -16,13 +16,11 @@ export default function AboutPage() {
     <>
       <main className="flex-1 flex items-center justify-center px-5 pb-24 pt-4">
         <div className="w-full max-w-lg mx-auto space-y-5">
-          <h1 className="text-[28px] sm:text-[34px] font-bold text-center tracking-tight">
-            <span className="bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
-              About
-            </span>
+          <h1 className="font-display text-[26px] sm:text-[32px] font-bold tracking-tight text-white">
+            About
           </h1>
 
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-5 text-sm">
+          <div className="bg-panel border border-hairline rounded-sm p-5 space-y-5 text-sm">
             <section>
               <h2 className="text-[15px] font-semibold text-white mb-2">What is Downvid?</h2>
               <p className="text-zinc-400 leading-relaxed text-[13px]">
@@ -60,7 +58,7 @@ export default function AboutPage() {
               <h2 className="text-[15px] font-semibold text-white mb-2.5">Supported Platforms</h2>
               <div className="flex flex-wrap gap-1.5">
                 {PLATFORMS.map((p) => (
-                  <span key={p} className="px-2.5 py-1 bg-zinc-800 border border-zinc-700/50 rounded-md text-[12px] text-zinc-300">
+                  <span key={p} className="px-2.5 py-1 bg-zinc-800 border border-zinc-700/50 rounded-sm text-[12px] text-zinc-300">
                     {p}
                   </span>
                 ))}

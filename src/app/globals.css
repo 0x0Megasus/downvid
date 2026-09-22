@@ -2,6 +2,17 @@
 
 @theme {
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-display), var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Transfer-deck tokens */
+  --color-base: #09090b;
+  --color-panel: #121214;
+  --color-raise: #1a1a1e;
+  --color-hairline: #232327;
+  --color-signal: #ff453a;
+  --color-signal-deep: #d92d20;
+  --color-ok: #4ade80;
 }
 
 @keyframes fadeIn {
@@ -13,6 +24,15 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-rise {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @keyframes shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
@@ -22,13 +42,44 @@
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+
+@utility animate-pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes stripes {
+  from { background-position: 0 0; }
+  to { background-position: 28px 0; }
+}
+
+@utility animate-stripes {
+  animation: stripes 0.8s linear infinite;
+}
+
+/* Staggered entrance for suggestion rows: one orchestrated cascade */
+.stagger-children > * {
+  animation: fadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 35ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 70ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 105ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 140ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 175ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 245ms; }
+
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
 }
 
 ::selection {
-  background-color: rgba(239, 68, 68, 0.25);
+  background-color: rgba(255, 69, 58, 0.3);
 }
 
 html {
@@ -37,8 +88,44 @@ html {
 
 body {
   overscroll-behavior: none;
+  background-color: var(--color-base);
 }
 
 @utility safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Skeleton: static wash by default, shimmer only when motion is allowed */
+@utility skeleton {
+  background: linear-gradient(
+    100deg,
+    #1b1b1f 40%,
+    #26262c 50%,
+    #1b1b1f 60%
+  );
+  background-size: 200% 100%;
+}
+
+@utility skeleton-animated {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(255, 69, 58, 0.6);
+  outline-offset: 2px;
+}
+
+input:focus,
+input:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

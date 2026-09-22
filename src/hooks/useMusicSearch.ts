@@ -21,24 +21,45 @@ const normalizeLabel = (label: string) => {
 export function useMusicSearch() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionItem | null>(null);
+  const [selectedSuggestion, setSelectedSuggestion] =
+    useState<SuggestionItem | null>(null);
   const [sessionId, setSessionId] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState("");
-  const { progress, status, statusMessage, startPolling, reset: resetProgress } = useProgress();
+  const [downloadId, setDownloadId] = useState<string | null>(null);
+  const {
+    progress,
+    status,
+    statusMessage,
+    startPolling,
+    reset: resetProgress,
+  } = useProgress();
   const downloadIdRef = useRef<string | null>(null);
+
+  const triggerBrowserDownload = useCallback((id: string) => {
+    const a = document.createElement("a");
+    a.href = getFileDownloadUrl(id);
+    a.download = "";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }, []);
 
   useEffect(() => {
     if (status === "complete" && downloadIdRef.current) {
       const id = downloadIdRef.current;
-      downloadIdRef.current = null;
-      window.location.href = getFileDownloadUrl(id);
+      setDownloadId(id);
+      setQuery("");
+      triggerBrowserDownload(id);
     }
-  }, [status]);
+  }, [status, triggerBrowserDownload]);
 
   const handleSearch = useCallback(async () => {
     setError("");
+    setDownloadId(null);
+    downloadIdRef.current = null;
+    resetProgress();
     if (!query.trim()) {
       setError("Please enter a song name");
       return;
@@ -50,26 +71,26 @@ export function useMusicSearch() {
       const data = await searchMusic(query.trim(), clientId);
       setSuggestions(
         data.suggestions.map((s) => ({
-          index: Number(s.id),
-          title: normalizeLabel(s.label),
+          index: Number.isNaN(Number(s.id)) ? s.id as unknown as number : Number(s.id),
+          title: normalizeLabel(s.label) || s.label,
           label: s.label,
         })),
       );
       setSessionId(data.sessionId);
+      setSelectedSuggestion(null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Search failed",
-      );
+      setError(err instanceof Error ? err.message : "Search failed");
     } finally {
       setIsSearching(false);
     }
-  }, [query]);
+  }, [query, resetProgress]);
 
   const handleSelect = useCallback(
     async (option: SuggestionItem) => {
       setError("");
+      setDownloadId(null);
       setSelectedSuggestion(option);
-      setSuggestions([]);
+      // Keep a copy so a failed download can be retried without re-search
       setIsDownloading(true);
       try {
         const { id } = await downloadMusic(sessionId, String(option.index));
@@ -78,12 +99,13 @@ export function useMusicSearch() {
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Download failed";
         if (/expired|not found|410|404/i.test(msg)) {
-          setSuggestions([]);
           setSelectedSuggestion(null);
           setSessionId("");
           setError("Session expired — please search again.");
         } else {
+          // Keep selection so user can tap again to retry
           setError(msg);
+          setSelectedSuggestion(option);
         }
       } finally {
         setIsDownloading(false);
@@ -92,6 +114,18 @@ export function useMusicSearch() {
     [sessionId, startPolling],
   );
 
+  const retryDownload = useCallback(() => {
+    if (selectedSuggestion) handleSelect(selectedSuggestion);
+  }, [selectedSuggestion, handleSelect]);
+
+  const dismissResult = useCallback(() => {
+    downloadIdRef.current = null;
+    setDownloadId(null);
+    setSelectedSuggestion(null);
+    setError("");
+    resetProgress();
+  }, [resetProgress]);
+
   const reset = useCallback(() => {
     setQuery("");
     setSuggestions([]);
@@ -99,6 +133,8 @@ export function useMusicSearch() {
     setSessionId("");
     setIsDownloading(false);
     setError("");
+    setDownloadId(null);
+    downloadIdRef.current = null;
     resetProgress();
   }, [resetProgress]);
 
@@ -107,14 +143,19 @@ export function useMusicSearch() {
     setQuery,
     suggestions,
     selectedSuggestion,
+    sessionId,
     isSearching,
     isDownloading,
     error,
     progress,
     status,
     statusMessage,
+    downloadId,
     handleSearch,
     handleSelect,
+    retryDownload,
+    dismissResult,
+    triggerBrowserDownload,
     reset,
   };
 }

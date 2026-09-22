@@ -15,11 +15,11 @@ export function AboutSection() {
         <h2 className="text-[15px] font-semibold text-white mb-2.5">Supported Platforms</h2>
         <div className="flex flex-wrap gap-1.5">
           {PLATFORMS.map((p) => (
-            <span key={p} className="px-2.5 py-1 bg-zinc-800 border border-zinc-700/50 rounded-md text-[12px] text-zinc-300">
+            <span key={p} className="px-2.5 py-1 bg-zinc-800 border border-zinc-700/50 rounded-sm text-[12px] text-zinc-300">
               {p}
             </span>
           ))}
-          <span className="px-2.5 py-1 bg-zinc-800/50 border border-zinc-700/30 rounded-md text-[12px] text-zinc-500">
+            <span className="px-2.5 py-1 bg-zinc-800/50 border border-zinc-700/30 rounded-sm text-[12px] text-zinc-500">
             & more
           </span>
         </div>
@@ -34,7 +34,7 @@ export function AboutSection() {
             { q: "Which platforms?", a: "YouTube, TikTok, Instagram, Facebook, Pinterest, Twitter/X and more." },
           ].map((faq) => (
             <details key={faq.q} className="group">
-              <summary className="cursor-pointer text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors py-2 px-3 bg-zinc-800/20 rounded-lg [&::-webkit-details-marker]:hidden flex items-center gap-2">
+                <summary className="cursor-pointer text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors py-2 px-3 bg-zinc-800/20 rounded-sm [&::-webkit-details-marker]:hidden flex items-center gap-2">
                 <svg className="w-3 h-3 text-zinc-600 group-open:rotate-90 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
