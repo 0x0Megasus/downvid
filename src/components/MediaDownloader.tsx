@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
+import { DownloadCat, type CatMood } from "./DownloadCat";
 import { submitDownload, getFileDownloadUrl } from "@/lib/api";
 import { validateUrl } from "@/lib/validators";
 import { useProgress } from "@/hooks/useProgress";
@@ -93,8 +94,20 @@ export function MediaDownloader() {
     status === "processing";
   const isEmpty = !url.trim();
 
+  const mood: CatMood =
+    status === "complete"
+      ? "complete"
+      : status === "error"
+        ? "sad"
+        : isBusy
+          ? "busy"
+          : "idle";
+
   return (
     <div className="space-y-4">
+      <div className="flex h-12 items-end justify-center">
+        <DownloadCat mood={mood} />
+      </div>
       <div className="flex gap-2">
         <label htmlFor="media-url" className="sr-only">
           Video link

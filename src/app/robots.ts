@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.SITE_URL || "https://www.downvid.online";
+  const baseUrl = process.env.SITE_URL || "https://downvid-delta.vercel.app";
   return {
     rules: {
       userAgent: "*",

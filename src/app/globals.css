@@ -38,10 +38,6 @@
   to { background-position: -200% 0; }
 }
 
-@utility animate-shimmer {
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.45; transform: scale(0.82); }
@@ -58,6 +54,65 @@
 
 @utility animate-stripes {
   animation: stripes 0.8s linear infinite;
+}
+
+/* Download cat */
+@keyframes cat-breathe {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-1px) scale(1.02, 0.98); }
+}
+
+@utility animate-cat-breathe {
+  animation: cat-breathe 2.4s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes cat-knead-left {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes cat-knead-right {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(0); }
+}
+
+@utility animate-cat-knead-left {
+  animation: cat-knead-left 0.7s ease-in-out infinite;
+}
+
+@utility animate-cat-knead-right {
+  animation: cat-knead-right 0.7s ease-in-out infinite;
+}
+
+@keyframes cat-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@utility animate-cat-hop {
+  animation: cat-hop 0.9s ease-in-out infinite;
+}
+
+@keyframes cat-tail {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(14deg); }
+}
+
+@utility animate-cat-tail {
+  animation: cat-tail 1.1s ease-in-out infinite;
+  transform-origin: 12% 85%;
+  transform-box: fill-box;
+}
+
+@keyframes z-float {
+  0% { opacity: 0; transform: translateY(2px) scale(0.8); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-8px) scale(1.1); }
+}
+
+@utility animate-z-float {
+  animation: z-float 2.4s ease-out infinite;
 }
 
 /* Staggered entrance for suggestion rows: one orchestrated cascade */

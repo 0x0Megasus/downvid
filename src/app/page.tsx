@@ -64,7 +64,7 @@ function HomeContent() {
             "@context": "https://schema.org",
             "@type": "WebApplication",
             name: "Downvid",
-            url: "https://www.downvid.online",
+            url: "https://downvid-delta.vercel.app",
             description:
               "Free no-login video and music downloader supporting YouTube, TikTok, Instagram, and more.",
             applicationCategory: "Multimedia",

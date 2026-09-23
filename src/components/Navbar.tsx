@@ -14,8 +14,8 @@ interface NavbarProps {
   onModeChange?: (mode: Mode) => void;
 }
 
-/** Minimum time the skeleton stays visible so the shimmer reads. */
-const SKELETON_MIN_MS = 450;
+/** Show the skeleton only if the destination takes longer than this. */
+const SKELETON_DELAY_MS = 150;
 
 const TABS: { id: string; label: string; icon: ReactNode }[] = [
   {
@@ -73,8 +73,10 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [pending, setPending] = useState<string | null>(null);
-  const pendingSince = useRef(0);
+  const [shown, setShown] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const failsafe = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navFrom = useRef<{ path: string; mode: Mode | undefined } | null>(null);
 
   const isActive = (id: string) => {
     if (id === "about") return pathname === "/about";
@@ -82,29 +84,43 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
     return activeMode === id;
   };
 
-  // Destination arrived: keep the skeleton for a beat so it reads,
-  // then reveal the page.
+  // Clear the pending state only once the destination actually arrives.
+  // Comparing against the snapshot keeps this effect from firing on the
+  // very render that sets pending (same location = not arrived yet).
   useEffect(() => {
     if (!pending) return;
-    const elapsed = Date.now() - pendingSince.current;
-    const wait = Math.max(0, SKELETON_MIN_MS - elapsed);
-    timer.current = setTimeout(() => setPending(null), wait);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
+    const from = navFrom.current;
+    if (!from) return;
+    if (pathname === from.path && activeMode === from.mode) return;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    if (failsafe.current) clearTimeout(failsafe.current);
+    failsafe.current = null;
+    navFrom.current = null;
+    setPending(null);
+    setShown(false);
   }, [pathname, activeMode, pending]);
 
   useEffect(() => {
     return () => {
       if (timer.current) clearTimeout(timer.current);
+      if (failsafe.current) clearTimeout(failsafe.current);
     };
   }, []);
 
   const handleClick = (id: string) => {
     if (pending) return;
     if (isActive(id)) return;
-    pendingSince.current = Date.now();
+    navFrom.current = { path: pathname, mode: activeMode };
     setPending(id);
+    // Only reveal the skeleton if the nav is genuinely slow.
+    timer.current = setTimeout(() => setShown(true), SKELETON_DELAY_MS);
+    // Failsafe: never trap the UI if a navigation stalls.
+    failsafe.current = setTimeout(() => {
+      navFrom.current = null;
+      setPending(null);
+      setShown(false);
+    }, 8000);
     if (id === "about") router.push("/about");
     else if (id === "privacy") router.push("/privacy");
     else if (pathname === "/") onModeChange?.(id as Mode);
@@ -113,7 +129,7 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
 
   return (
     <>
-      {pending && (
+      {pending && shown && (
         <div
           className="fixed inset-0 z-40 bg-base animate-fadeIn"
           aria-hidden="true"

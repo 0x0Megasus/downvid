@@ -3,7 +3,6 @@ import type {
   ProgressResponse,
   MusicSearchResponse,
   MusicDownloadResponse,
-  FileInfo,
 } from "@/types";
 import { REQUEST_TIMEOUT_MS } from "@/lib/constants";
 
@@ -64,10 +63,6 @@ export async function submitDownload(url: string): Promise<DownloadResponse> {
 
 export async function getProgress(id: string): Promise<ProgressResponse> {
   return request<ProgressResponse>(`/api/progress/${id}`);
-}
-
-export async function getFileInfo(id: string): Promise<FileInfo> {
-  return request<FileInfo>(`/api/info/${id}`);
 }
 
 export async function searchMusic(

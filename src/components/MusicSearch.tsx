@@ -4,6 +4,7 @@ import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
 import { Skeleton } from "./ui/Skeleton";
+import { DownloadCat, type CatMood } from "./DownloadCat";
 import { useMusicSearch } from "@/hooks/useMusicSearch";
 
 const SYSTEM_BUTTON_LABELS = new Set([
@@ -37,8 +38,20 @@ export function MusicSearch() {
     status === "processing";
   const isEmpty = !query.trim();
 
+  const mood: CatMood =
+    status === "complete"
+      ? "complete"
+      : status === "error"
+        ? "sad"
+        : isBusy || isSearching || isDownloading
+          ? "busy"
+          : "idle";
+
   return (
     <div className="space-y-4">
+      <div className="flex h-12 items-end justify-center">
+        <DownloadCat mood={mood} />
+      </div>
       <div className="flex gap-2">
         <label htmlFor="music-query" className="sr-only">
           Song or artist

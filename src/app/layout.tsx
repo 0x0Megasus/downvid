@@ -16,7 +16,7 @@ const mono = JetBrains_Mono({
 });
 
 const APP_NAME = "Downvid - Free Video & Music Downloader";
-const BASE_URL = "https://www.downvid.online";
+const BASE_URL = "https://downvid-delta.vercel.app";
 const APP_DESCRIPTION =
   "Download videos, images, and music from YouTube, TikTok, Instagram, Facebook, and more. Free, no login required.";
 
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.downvid.online",
+    url: "https://downvid-delta.vercel.app",
     siteName: "Downvid",
     title: APP_NAME,
     description: APP_DESCRIPTION,

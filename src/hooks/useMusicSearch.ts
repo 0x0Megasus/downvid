@@ -126,24 +126,11 @@ export function useMusicSearch() {
     resetProgress();
   }, [resetProgress]);
 
-  const reset = useCallback(() => {
-    setQuery("");
-    setSuggestions([]);
-    setSelectedSuggestion(null);
-    setSessionId("");
-    setIsDownloading(false);
-    setError("");
-    setDownloadId(null);
-    downloadIdRef.current = null;
-    resetProgress();
-  }, [resetProgress]);
-
   return {
     query,
     setQuery,
     suggestions,
     selectedSuggestion,
-    sessionId,
     isSearching,
     isDownloading,
     error,
@@ -155,7 +142,5 @@ export function useMusicSearch() {
     handleSelect,
     retryDownload,
     dismissResult,
-    triggerBrowserDownload,
-    reset,
   };
 }
