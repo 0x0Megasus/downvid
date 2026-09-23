@@ -10,14 +10,23 @@ const URL_PATTERNS = [
   /dailymotion\.com/i,
 ];
 
-export function validateUrl(url: string): boolean {
+export type UrlCheck = "ok" | "invalid" | "unsupported";
+
+export function checkUrl(url: string): UrlCheck {
+  let parsed: URL;
   try {
-    const parsed = new URL(url);
-    if (!["http:", "https:"].includes(parsed.protocol)) return false;
-    return URL_PATTERNS.some((p) => p.test(parsed.hostname));
+    parsed = new URL(url);
   } catch {
-    return false;
+    return "invalid";
   }
+  if (!["http:", "https:"].includes(parsed.protocol)) return "invalid";
+  return URL_PATTERNS.some((p) => p.test(parsed.hostname))
+    ? "ok"
+    : "unsupported";
+}
+
+export function validateUrl(url: string): boolean {
+  return checkUrl(url) === "ok";
 }
 
 export function getClientId(): string {

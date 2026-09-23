@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
 import { Skeleton } from "./ui/Skeleton";
 import { DownloadCat, type CatMood } from "./DownloadCat";
+import { pushToast } from "@/lib/toast";
 import { useMusicSearch } from "@/hooks/useMusicSearch";
 
 const SYSTEM_BUTTON_LABELS = new Set([
@@ -38,6 +40,16 @@ export function MusicSearch() {
     status === "processing";
   const isEmpty = !query.trim();
 
+  useEffect(() => {
+    if (error) pushToast(error);
+  }, [error]);
+
+  useEffect(() => {
+    if (status === "error") {
+      pushToast(statusMessage || "The transfer stopped.");
+    }
+  }, [status, statusMessage]);
+
   const mood: CatMood =
     status === "complete"
       ? "complete"
@@ -68,7 +80,7 @@ export function MusicSearch() {
             if (status !== "idle") dismissResult();
           }}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          error={error}
+          invalid={!!error}
           disabled={isSearching || isBusy || isDownloading}
           aria-label="Song or artist"
         />

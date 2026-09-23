@@ -6,7 +6,8 @@ import { Button } from "./ui/Button";
 import { ProgressBar } from "./ui/ProgressBar";
 import { DownloadCat, type CatMood } from "./DownloadCat";
 import { submitDownload, getFileDownloadUrl } from "@/lib/api";
-import { validateUrl } from "@/lib/validators";
+import { checkUrl } from "@/lib/validators";
+import { pushToast } from "@/lib/toast";
 import { useProgress } from "@/hooks/useProgress";
 
 const PLATFORM_HINTS = [
@@ -51,6 +52,16 @@ export function MediaDownloader() {
     };
   }, []);
 
+  useEffect(() => {
+    if (error) pushToast(error);
+  }, [error]);
+
+  useEffect(() => {
+    if (status === "error") {
+      pushToast(statusMessage || "The transfer stopped. Check the link and retry.");
+    }
+  }, [status, statusMessage]);
+
   const handleSubmit = useCallback(async () => {
     setError("");
     setDownloadId(null);
@@ -59,8 +70,13 @@ export function MediaDownloader() {
       setError("Paste a video link first.");
       return;
     }
-    if (!validateUrl(trimmed)) {
-      setError("That link is not supported yet. Try YouTube, TikTok or Instagram.");
+    const check = checkUrl(trimmed);
+    if (check === "invalid") {
+      setError("That doesn't look like a link. Paste the full address, starting with https://");
+      return;
+    }
+    if (check === "unsupported") {
+      setError("We can't download from that site yet. Try YouTube, TikTok or Instagram.");
       return;
     }
 
@@ -129,7 +145,7 @@ export function MediaDownloader() {
             }
           }}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          error={error}
+          invalid={!!error}
           disabled={isBusy}
           aria-label="Video link"
         />
@@ -180,7 +196,7 @@ export function MediaDownloader() {
         </p>
       )}
 
-      {status === "idle" && !error && (
+      {status === "idle" && (
         <ul className="flex flex-wrap gap-1.5" aria-label="Supported platforms">
           {PLATFORM_HINTS.map((p) => (
             <li

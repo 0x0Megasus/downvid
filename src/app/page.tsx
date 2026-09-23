@@ -36,7 +36,7 @@ function HomeContent() {
             </div>
             <h1 className="mt-2 font-display text-[30px] sm:text-[38px] font-bold leading-[1.02] tracking-tight text-white text-balance">
               {mode === "media" ? "Download videos and photos" : "Find the song and download it"}
-            </h1>
+            </h1> <br />
             <p className="mt-1 text-[13px] sm:text-sm text-zinc-500">
               {mode === "media"
                 ? "Paste a link from YouTube, TikTok, Instagram and more. Free, no account."

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/Toaster";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -118,6 +119,7 @@ export default function RootLayout({
         className="font-sans bg-black text-white antialiased min-h-dvh flex flex-col"
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
