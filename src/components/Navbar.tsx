@@ -10,17 +10,20 @@ import type { Mode } from "@/types";
 import type { ReactNode } from "react";
 
 interface NavbarProps {
+  /** @deprecated No longer needed — active tab is derived from the pathname. */
   activeMode?: Mode;
+  /** @deprecated No longer needed — navigation uses route pushes. */
   onModeChange?: (mode: Mode) => void;
 }
 
 /** Show the skeleton only if the destination takes longer than this. */
 const SKELETON_DELAY_MS = 150;
 
-const TABS: { id: string; label: string; icon: ReactNode }[] = [
+const TABS: { id: string; label: string; href: string; icon: ReactNode }[] = [
   {
     id: "media",
     label: "Video",
+    href: "/",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -32,6 +35,7 @@ const TABS: { id: string; label: string; icon: ReactNode }[] = [
   {
     id: "music",
     label: "Music",
+    href: "/music",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
         <path d="M9 18V5l12-2v13" />
@@ -43,6 +47,7 @@ const TABS: { id: string; label: string; icon: ReactNode }[] = [
   {
     id: "about",
     label: "About",
+    href: "/about",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
         <circle cx="12" cy="12" r="10" />
@@ -54,6 +59,7 @@ const TABS: { id: string; label: string; icon: ReactNode }[] = [
   {
     id: "privacy",
     label: "Privacy",
+    href: "/privacy",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -69,14 +75,23 @@ function PendingSkeleton({ id }: { id: string }) {
   return <HomeSkeleton />;
 }
 
-export function Navbar({ activeMode, onModeChange }: NavbarProps) {
+function modeFromPath(pathname: string): Mode | undefined {
+  if (pathname === "/music") return "music";
+  if (pathname === "/") return "media";
+  return undefined;
+}
+
+export function Navbar({ activeMode: activeModeProp }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [pending, setPending] = useState<string | null>(null);
   const [shown, setShown] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const failsafe = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navFrom = useRef<{ path: string; mode: Mode | undefined } | null>(null);
+  const navFrom = useRef<string | null>(null);
+
+  const derivedMode = modeFromPath(pathname);
+  const activeMode = activeModeProp ?? derivedMode;
 
   const isActive = (id: string) => {
     if (id === "about") return pathname === "/about";
@@ -84,14 +99,11 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
     return activeMode === id;
   };
 
-  // Clear the pending state only once the destination actually arrives.
-  // Comparing against the snapshot keeps this effect from firing on the
-  // very render that sets pending (same location = not arrived yet).
+  // Clear the pending state only once the destination route arrives.
   useEffect(() => {
     if (!pending) return;
-    const from = navFrom.current;
-    if (!from) return;
-    if (pathname === from.path && activeMode === from.mode) return;
+    if (navFrom.current === null) return;
+    if (pathname === navFrom.current) return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     if (failsafe.current) clearTimeout(failsafe.current);
@@ -99,7 +111,7 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
     navFrom.current = null;
     setPending(null);
     setShown(false);
-  }, [pathname, activeMode, pending]);
+  }, [pathname, pending]);
 
   useEffect(() => {
     return () => {
@@ -111,7 +123,9 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
   const handleClick = (id: string) => {
     if (pending) return;
     if (isActive(id)) return;
-    navFrom.current = { path: pathname, mode: activeMode };
+    const tab = TABS.find((t) => t.id === id);
+    if (!tab) return;
+    navFrom.current = pathname;
     setPending(id);
     // Only reveal the skeleton if the nav is genuinely slow.
     timer.current = setTimeout(() => setShown(true), SKELETON_DELAY_MS);
@@ -121,10 +135,7 @@ export function Navbar({ activeMode, onModeChange }: NavbarProps) {
       setPending(null);
       setShown(false);
     }, 8000);
-    if (id === "about") router.push("/about");
-    else if (id === "privacy") router.push("/privacy");
-    else if (pathname === "/") onModeChange?.(id as Mode);
-    else router.push(`/?mode=${id}`);
+    router.push(tab.href);
   };
 
   return (

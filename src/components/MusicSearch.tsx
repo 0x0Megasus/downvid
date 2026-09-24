@@ -28,6 +28,8 @@ export function MusicSearch() {
     status,
     statusMessage,
     downloadId,
+    completedTitle,
+    sessionId,
     handleSearch,
     handleSelect,
     retryDownload,
@@ -158,13 +160,15 @@ export function MusicSearch() {
         </div>
       )}
 
-      {status === "complete" && downloadId && selectedSuggestion && (
+      {status === "complete" && downloadId && (
         <div className="animate-fadeIn rounded-sm border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-2.5">
-          <p className="truncate text-[13px] text-zinc-200">
-            {selectedSuggestion.title}
-          </p>
+          {completedTitle && (
+            <p className="truncate text-[13px] text-zinc-200">
+              {completedTitle}
+            </p>
+          )}
           <p className="mt-0.5 text-xs text-emerald-300">
-            Downloaded. Search another anytime.
+            Downloaded. Type a song or singer above for fresh results.
           </p>
         </div>
       )}
@@ -174,6 +178,7 @@ export function MusicSearch() {
         !isBusy &&
         status !== "complete" &&
         status !== "error" &&
+        sessionId &&
         suggestions.length > 0 && (
           <ol className="stagger-children max-h-[40vh] space-y-1.5 overflow-y-auto scroll-smooth">
             {suggestions

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     typeof body.optionId === "string" ? body.optionId.trim() : "";
   if (!sessionId || !optionId || sessionId.length > 256 || optionId.length > 64) {
     return NextResponse.json(
-      { error: "sessionId and optionId are required" },
+      { error: "That list expired — type the song or singer again to get fresh results." },
       { status: 400 },
     );
   }

@@ -28,6 +28,7 @@ export function useMusicSearch() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState("");
   const [downloadId, setDownloadId] = useState<string | null>(null);
+  const [completedTitle, setCompletedTitle] = useState<string | null>(null);
   const {
     progress,
     status,
@@ -49,15 +50,23 @@ export function useMusicSearch() {
   useEffect(() => {
     if (status === "complete" && downloadIdRef.current) {
       const id = downloadIdRef.current;
+      downloadIdRef.current = null;
       setDownloadId(id);
+      // Session is single-use: drop stale options + session so the user
+      // must type a fresh query instead of tapping an expired list.
+      setCompletedTitle(selectedSuggestion?.title ?? null);
       setQuery("");
+      setSuggestions([]);
+      setSessionId("");
+      setSelectedSuggestion(null);
       triggerBrowserDownload(id);
     }
-  }, [status, triggerBrowserDownload]);
+  }, [status, selectedSuggestion, triggerBrowserDownload]);
 
   const handleSearch = useCallback(async () => {
     setError("");
     setDownloadId(null);
+    setCompletedTitle(null);
     downloadIdRef.current = null;
     resetProgress();
     if (!query.trim()) {
@@ -87,7 +96,18 @@ export function useMusicSearch() {
 
   const handleSelect = useCallback(
     async (option: SuggestionItem) => {
+      // Guard: never send an empty/expired session to the API.
+      // This skips the technical "sessionId and optionId are required"
+      // error and forces a fresh search instead.
+      if (!sessionId) {
+        setSuggestions([]);
+        setSelectedSuggestion(null);
+        setCompletedTitle(null);
+        setError("That list expired — type the song or singer again to get fresh results.");
+        return;
+      }
       setError("");
+      setCompletedTitle(null);
       setDownloadId(null);
       setSelectedSuggestion(option);
       // Keep a copy so a failed download can be retried without re-search
@@ -98,10 +118,13 @@ export function useMusicSearch() {
         startPolling(id);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Download failed";
-        if (/expired|not found|410|404/i.test(msg)) {
+        if (/expired|not found|410|404|required/i.test(msg)) {
+          // Session ended: wipe stale options so they can't be tapped again.
+          setSuggestions([]);
           setSelectedSuggestion(null);
           setSessionId("");
-          setError("Session expired — please search again.");
+          setCompletedTitle(null);
+          setError("That list expired — type the song or singer again to get fresh results.");
         } else {
           // Keep selection so user can tap again to retry
           setError(msg);
@@ -115,13 +138,19 @@ export function useMusicSearch() {
   );
 
   const retryDownload = useCallback(() => {
+    // Retry only works while the session is still alive; otherwise the
+    // guard in handleSelect will ask for a fresh search.
     if (selectedSuggestion) handleSelect(selectedSuggestion);
   }, [selectedSuggestion, handleSelect]);
 
   const dismissResult = useCallback(() => {
+    // Typing a new query invalidates the old session list immediately.
     downloadIdRef.current = null;
     setDownloadId(null);
     setSelectedSuggestion(null);
+    setSuggestions([]);
+    setSessionId("");
+    setCompletedTitle(null);
     setError("");
     resetProgress();
   }, [resetProgress]);
@@ -138,6 +167,8 @@ export function useMusicSearch() {
     status,
     statusMessage,
     downloadId,
+    completedTitle,
+    sessionId,
     handleSearch,
     handleSelect,
     retryDownload,
