@@ -1,5 +1,5 @@
 {
   "env": {
-    "BACKEND_URL": "https://mega-video-downloader-production-ca4e.up.railway.app"
+    "BACKEND_URL": "https://mega-video-downloader.0x00megasus.workers.dev"
   }
 }
